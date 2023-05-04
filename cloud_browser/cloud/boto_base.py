@@ -34,9 +34,8 @@ class BotoExceptionWrapper(errors.CloudExceptionWrapper):
         """Return whether or not to do translation."""
         from boto.exception import StorageResponseError
 
-        if isinstance(exc, StorageResponseError):
-            if exc.status == 404:
-                return self.error_cls(unicode(exc))
+        if isinstance(exc, StorageResponseError) and exc.status == 404:
+            return self.error_cls(unicode(exc))
 
         return None
 
@@ -88,8 +87,7 @@ class BotoObject(base.CloudObject):
         elif cls.is_key(result):
             return cls.from_key(container, result)
 
-        raise errors.CloudException("Unknown boto result type: %s" %
-                                    type(result))
+        raise errors.CloudException(f"Unknown boto result type: {type(result)}")
 
     @classmethod
     def from_prefix(cls, container, prefix):

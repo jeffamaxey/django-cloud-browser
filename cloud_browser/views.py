@@ -27,20 +27,17 @@ def settings_view_decorator(function):
     if isinstance(dec, basestring):
         # Split into module and decorator strings.
         mod_str, _, dec_str = dec.rpartition('.')
-        if not (mod_str and dec_str):
-            raise ImportError("Unable to import module: %s" % mod_str)
+        if not mod_str or not dec_str:
+            raise ImportError(f"Unable to import module: {mod_str}")
 
         # Import and try to get decorator function.
         mod = import_module(mod_str)
         if not hasattr(mod, dec_str):
-            raise ImportError("Unable to import decorator: %s" % dec)
+            raise ImportError(f"Unable to import decorator: {dec}")
 
         dec = getattr(mod, dec_str)
 
-    if dec and callable(dec):
-        return dec(function)
-
-    return function
+    return dec(function) if dec and callable(dec) else function
 
 
 def _breadcrumbs(path):
@@ -96,7 +93,7 @@ def browser(request, path='', template="cloud_browser/browser.html"):
         cont_eq = lambda c: c.name == container_path
         cont_list = list(islice(ifilter(cont_eq, containers), 1))
         if not cont_list:
-            raise Http404("No container at: %s" % container_path)
+            raise Http404(f"No container at: {container_path}")
 
         # Q2: Get objects for instant list, plus one to check "next".
         container = cont_list[0]
@@ -134,14 +131,14 @@ def document(_, path=''):
     try:
         container = conn.get_container(container_path)
     except errors.NoContainerException:
-        raise Http404("No container at: %s" % container_path)
+        raise Http404(f"No container at: {container_path}")
     except errors.NotPermittedException:
-        raise Http404("Access denied for container at: %s" % container_path)
+        raise Http404(f"Access denied for container at: {container_path}")
 
     try:
         storage_obj = container.get_object(object_path)
     except errors.NoObjectException:
-        raise Http404("No object at: %s" % object_path)
+        raise Http404(f"No object at: {object_path}")
 
     # Get content-type and encoding.
     content_type = storage_obj.smart_content_type

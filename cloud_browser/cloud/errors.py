@@ -92,8 +92,7 @@ class CloudExceptionWrapper(object):
 
         # Patch in lazy translations.
         if not obj.translations:
-            lazy_translations = cls.lazy_translations()
-            if lazy_translations:
+            if lazy_translations := cls.lazy_translations():
                 obj.translations = lazy_translations
 
         return obj
@@ -114,12 +113,14 @@ class CloudExceptionWrapper(object):
         Calling code should only raise exception if exception class is passed
         in, else ``None`` (which signifies no wrapping should be done).
         """
-        # Find actual class.
-        for key in self.translations.keys():
-            if isinstance(exc, key):
-                return self.translations[key](unicode(exc))
-
-        return None
+        return next(
+            (
+                self.translations[key](unicode(exc))
+                for key in self.translations.keys()
+                if isinstance(exc, key)
+            ),
+            None,
+        )
 
     def __call__(self, operation):
         """Call and wrap exceptions."""

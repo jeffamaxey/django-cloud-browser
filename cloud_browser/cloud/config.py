@@ -24,7 +24,15 @@ class Config(object):
                 conn_cls = AwsConnection
                 conn_fn = lambda: AwsConnection(account, secret_key)
 
-        if datastore == 'Google':
+        elif datastore == 'Filesystem':
+            # Mock filesystem
+            root = settings.CLOUD_BROWSER_FILESYSTEM_ROOT
+            if root is not None:
+                from cloud_browser.cloud.fs import FilesystemConnection
+                conn_cls = FilesystemConnection
+                conn_fn = lambda: FilesystemConnection(root)
+
+        elif datastore == 'Google':
             # Try Google Storage
             from cloud_browser.cloud.google import GsConnection
             account = settings.CLOUD_BROWSER_GS_ACCOUNT
@@ -37,29 +45,21 @@ class Config(object):
             # Try Rackspace
             account = settings.CLOUD_BROWSER_RACKSPACE_ACCOUNT
             secret_key = settings.CLOUD_BROWSER_RACKSPACE_SECRET_KEY
-            servicenet = settings.CLOUD_BROWSER_RACKSPACE_SERVICENET
-            authurl = settings.CLOUD_BROWSER_RACKSPACE_AUTHURL
             if account and secret_key:
                 from cloud_browser.cloud.rackspace import RackspaceConnection
                 conn_cls = RackspaceConnection
+                servicenet = settings.CLOUD_BROWSER_RACKSPACE_SERVICENET
+                authurl = settings.CLOUD_BROWSER_RACKSPACE_AUTHURL
                 conn_fn = lambda: RackspaceConnection(
                     account,
                     secret_key,
                     servicenet=servicenet,
                     authurl=authurl)
 
-        elif datastore == 'Filesystem':
-            # Mock filesystem
-            root = settings.CLOUD_BROWSER_FILESYSTEM_ROOT
-            if root is not None:
-                from cloud_browser.cloud.fs import FilesystemConnection
-                conn_cls = FilesystemConnection
-                conn_fn = lambda: FilesystemConnection(root)
-
         if conn_cls is None:
             raise ImproperlyConfigured(
-                "No suitable credentials found for datastore: %s." %
-                datastore)
+                f"No suitable credentials found for datastore: {datastore}."
+            )
 
         # Adjust connection function.
         conn_fn = staticmethod(conn_fn)

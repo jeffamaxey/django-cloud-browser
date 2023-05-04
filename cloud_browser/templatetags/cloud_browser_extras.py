@@ -55,7 +55,7 @@ def cloud_browser_media_url(_, token):
     """
     bits = token.split_contents()
     if len(bits) != 2:
-        raise TemplateSyntaxError("'%s' takes one argument" % bits[0])
+        raise TemplateSyntaxError(f"'{bits[0]}' takes one argument")
     rel_path = bits[1]
 
     return MediaUrlNode(rel_path)

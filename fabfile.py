@@ -1,4 +1,5 @@
 """Fabric file."""
+
 from __future__ import with_statement
 
 import os
@@ -42,7 +43,7 @@ SDIST_RST_FILES = (
     "README.rst",
     "CHANGES.rst",
 )
-SDIST_TXT_FILES = [os.path.splitext(x)[0] + ".txt" for x in SDIST_RST_FILES]
+SDIST_TXT_FILES = [f"{os.path.splitext(x)[0]}.txt" for x in SDIST_RST_FILES]
 
 
 ###############################################################################
@@ -51,7 +52,7 @@ SDIST_TXT_FILES = [os.path.splitext(x)[0] + ".txt" for x in SDIST_RST_FILES]
 def clean():
     """Clean build files."""
     for build_dir in list(BUILD_DIRS) + [DOC_OUTPUT, DEV_DB_DIR]:
-        local("rm -rf %s" % build_dir)
+        local(f"rm -rf {build_dir}")
 
 
 @contextmanager
@@ -60,14 +61,14 @@ def _dist_wrapper():
     try:
         # Copy select *.rst files to *.txt for build.
         for rst_file, txt_file in zip(SDIST_RST_FILES, SDIST_TXT_FILES):
-            local("cp %s %s" % (rst_file, txt_file))
+            local(f"cp {rst_file} {txt_file}")
 
         # Perform action.
         yield
     finally:
         # Clean up temp *.txt files.
         for rst_file in SDIST_TXT_FILES:
-            local("rm -f %s" % rst_file, capture=False)
+            local(f"rm -f {rst_file}", capture=False)
 
 
 def sdist():
@@ -102,16 +103,17 @@ def pylint(rcfile=PYLINT_CFG):
     """
     # Have a spurious DeprecationWarning in pylint.
     local(
-        "python -W ignore::DeprecationWarning `which pylint` --rcfile=%s %s" %
-        (rcfile, " ".join(CHECK_INCLUDES)), capture=False)
+        f'python -W ignore::DeprecationWarning `which pylint` --rcfile={rcfile} {" ".join(CHECK_INCLUDES)}',
+        capture=False,
+    )
 
 
 def pep8():
     """Run pep8 style checker."""
-    includes = "-r %s" % " ".join(CHECK_INCLUDES)
-    ignores = "--ignore=%s" % ",".join(PEP8_IGNORES) if PEP8_IGNORES else ''
+    includes = f'-r {" ".join(CHECK_INCLUDES)}'
+    ignores = f'--ignore={",".join(PEP8_IGNORES)}' if PEP8_IGNORES else ''
     with settings(warn_only=True):
-        results = local("pep8 %s %s" % (includes, ignores), capture=True)
+        results = local(f"pep8 {includes} {ignores}", capture=True)
     errors = results.strip() if results else None
     if errors:
         print(errors)
@@ -133,12 +135,12 @@ def _parse_bool(value):
         return value
 
     elif isinstance(value, basestring):
-        if value == 'True':
-            return True
-        elif value == 'False':
+        if value == 'False':
             return False
 
-    raise Exception("Value %s is not boolean." % value)
+        elif value == 'True':
+            return True
+    raise Exception(f"Value {value} is not boolean.")
 
 
 def docs(output=DOC_OUTPUT, proj_settings=PROJ_SETTINGS, github=False):
@@ -155,7 +157,7 @@ def docs(output=DOC_OUTPUT, proj_settings=PROJ_SETTINGS, github=False):
           capture=False)
 
     if _parse_bool(github):
-        local("touch %s/.nojekyll" % output, capture=False)
+        local(f"touch {output}/.nojekyll", capture=False)
 
 
 ###############################################################################
@@ -172,7 +174,7 @@ def _manage(target, extra='', proj_settings=PROJ_SETTINGS):
 
 def syncdb(proj_settings=PROJ_SETTINGS):
     """Run syncdb."""
-    local("mkdir -p %s" % DEV_DB_DIR)
+    local(f"mkdir -p {DEV_DB_DIR}")
     _manage("syncdb", proj_settings=proj_settings)
 
 

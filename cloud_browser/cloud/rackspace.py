@@ -189,8 +189,9 @@ class RackspaceContainer(base.CloudContainer):
 
         # Enforce maximum object size.
         if limit > RS_MAX_LIST_OBJECTS_LIMIT:
-            raise errors.CloudException("Object limit must be less than %s" %
-                                        RS_MAX_LIST_OBJECTS_LIMIT)
+            raise errors.CloudException(
+                f"Object limit must be less than {RS_MAX_LIST_OBJECTS_LIMIT}"
+            )
 
         def _collapse(infos):
             """Remove duplicate dummy / implied objects."""

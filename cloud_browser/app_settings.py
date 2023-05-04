@@ -67,12 +67,12 @@ class BoolSetting(Setting):
             return value
 
         elif isinstance(value, basestring):
-            if value == 'True':
-                return True
-            elif value == 'False':
+            if value == 'False':
                 return False
 
-        raise Exception("Value %s is not boolean." % value)
+            elif value == 'True':
+                return True
+        raise Exception(f"Value {value} is not boolean.")
 
 
 ###############################################################################
@@ -250,20 +250,17 @@ class Settings(object):
     @property
     def app_media_url(self):
         """Get application media root from real media root URL."""
-        url = None
-        media_dir = self.CLOUD_BROWSER_STATIC_MEDIA_DIR
-        if media_dir:
-            url = os.path.join(self.MEDIA_URL, media_dir).rstrip('/') + '/'
-
-        return url
+        return (
+            os.path.join(self.MEDIA_URL, media_dir).rstrip('/') + '/'
+            if (media_dir := self.CLOUD_BROWSER_STATIC_MEDIA_DIR)
+            else None
+        )
 
     @property
-    def app_media_doc_root(self):  # pylint: disable=R0201
+    def app_media_doc_root(self):    # pylint: disable=R0201
         """Get application media document (file) root."""
         app_dir = os.path.abspath(os.path.dirname(__file__))
-        media_root = os.path.join(app_dir, 'media')
-
-        return media_root
+        return os.path.join(app_dir, 'media')
 
 
 settings = Settings()  # pylint: disable=C0103

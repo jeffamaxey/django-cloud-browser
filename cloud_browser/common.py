@@ -64,7 +64,7 @@ def requires(module, name=""):
     def wrapped(method):
         """Call and enforce method."""
         if module is None:
-            raise ImproperlyConfigured("Module '%s' is not installed." % name)
+            raise ImproperlyConfigured(f"Module '{name}' is not installed.")
         return method
 
     return wrapped
@@ -137,10 +137,7 @@ def basename(path):
     """Rightmost part of path after separator."""
     base_path = path.strip(SEP)
     sep_ind = base_path.rfind(SEP)
-    if sep_ind < 0:
-        return path
-
-    return base_path[sep_ind+1:]
+    return path if sep_ind < 0 else base_path[sep_ind+1:]
 
 
 def path_parts(path):
@@ -165,8 +162,7 @@ def path_parts(path):
 
 def path_yield(path):
     """Yield on all path parts."""
-    for part in (x for x in path.strip(SEP).split(SEP) if x not in (None, '')):
-        yield part
+    yield from (x for x in path.strip(SEP).split(SEP) if x not in (None, ''))
 
 
 def path_list(path):

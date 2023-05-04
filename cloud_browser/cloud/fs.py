@@ -150,6 +150,5 @@ class FilesystemConnection(base.CloudConnection):
         """Return single container."""
         path = path.strip(SEP)
         if SEP in path:
-            raise errors.InvalidNameException(
-                "Path contains %s - %s" % (SEP, path))
+            raise errors.InvalidNameException(f"Path contains {SEP} - {path}")
         return self.cont_cls.from_path(self, path)
